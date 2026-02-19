@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 1-1: Deep Dive into LLMs</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.8;
+            color: #333;
+        }
+        h1 {
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #0366d6;
+            margin-top: 30px;
+        }
+        h3 {
+            margin-top: 20px;
+        }
+        .meta {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f6f8fa;
+            border-radius: 6px;
+        }
+        .back-link {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .back-link a {
+            text-decoration: none;
+            color: #0366d6;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        .timestamp {
+            color: #666;
+            font-size: 0.85em;
+        }
+    </style>
+</head>
+<body>
+    <div class="meta">
+        <p><strong>原文链接：</strong><a href="https://www.youtube.com/watch?v=7xTGNNLPyMI" target="_blank">https://www.youtube.com/watch?v=7xTGNNLPyMI</a></p>
+        <p><strong>原文标题：</strong>Deep Dive into LLMs like ChatGPT</p>
+        <p><strong>讲师：</strong>Andrej Karpathy</p>
+        <p><strong>所属周次：</strong>Week 1-1</p>
+        <p><strong>阅读时间：</strong>约 25 分钟 (Part 1)</p>
+        <p><strong>优先级：</strong>⭐ 必读</p>
+    </div>
+
+    <h1>像 ChatGPT 这样的大型语言模型深度解析 (Part 1)</h1>
+
+    <h2>0. 引言：我们需要什么样的心理模型？</h2>
+
+    <p><span class="timestamp">[00:00:00]</span> 大家好。我想制作这个视频已经有一段时间了。这是一个关于像 ChatGPT 这样的 <strong>大型语言模型（Large Language Models, LLMs）</strong> 的入门介绍。我希望这个视频能成为该主题的某种"权威指南"。</p>
+
+    <p><span class="timestamp">[00:00:15]</span> 我的目标受众是普通大众。我的目的是为你提供一种 <strong>心理模型（Mental Model）</strong>，让你知道当你使用这些工具时，到底发生了什么。显然，在某些方面它们是神奇和令人惊叹的，它们在某些事情上做得非常好；但在另一些事情上，它们不仅不擅长，甚至可以说是失败的。它们有很多"锋利的边缘"，有很多你需要注意的地方。</p>
+
+    <p><span class="timestamp">[00:00:35]</span> 那么，在这个文本框背后到底是什么？你可以在里面输入任何东西并按回车，但我们应该输入什么？生成的这些词是如何回来的？这是如何工作的？你到底在和谁说话？</p>
+
+    <p><span class="timestamp">[00:00:46]</span> 我希望在这个视频中探讨所有这些话题。我们将通过整个流程来了解这些东西是如何构建的，我希望带你通过训练一个现代 LLM 的每一个阶段，但我会保持一切对普通观众来说都是通俗易懂的。首先，让我们看看如何构建像 ChatGPT 这样的东西。</p>
+
+    <hr>
+
+    <h2>1. 预训练阶段 (Pre-training)：这一过程的起点</h2>
+
+    <p><span class="timestamp">[00:01:04]</span> 让我们来构建 ChatGPT。这将涉及按顺序排列的多个阶段。第一个阶段称为 <strong>预训练（Pre-training）</strong> 阶段。</p>
+
+    <p><span class="timestamp">[00:01:14]</span> 预训练阶段的第一步非常直观：我们需要下载并处理互联网。为了让你对这大概是什么样子有个概念，我建议看看 Hugging Face 这家公司最近发布的一个名为 "FineWeb" 的数据集。他们在博客文章中详细介绍了如何构建 FineWeb 数据集。</p>
+
+    <p><span class="timestamp">[00:01:34]</span> 所有主要的 LLM 提供商，如 OpenAI、Anthropic、Google、Meta 等，内部都会有某种等同于 FineWeb 数据集的东西。</p>
+
+    <h3>1.1 数据收集：我们需要什么？</h3>
+
+    <p><span class="timestamp">[00:01:42]</span> 大致来说，我们要实现什么？我们试图从公开来源获取互联网上的大量文本。我们有两个核心目标：</p>
+    <ol>
+        <li><strong>海量（Large Quantity）</strong>：我们需要极其庞大的文本量。</li>
+        <li><strong>高质量与多样性（Quality & Diversity）</strong>：我们希望这些文档质量很高，涵盖各种主题（语言、编码、历史、物理、化学、生物等）。因为我们希望这些模型内部包含这些知识。</li>
+    </ol>
+
+    <p><span class="timestamp">[00:02:14]</span> FineWeb 是一个在生产级应用中相当有代表性的数据集，实际上最终只占用了大约 44 TB 的磁盘空间。如果你仔细想想，这在今天并不是一个不可想象的巨大数据量。你可以去商店买大约 5 到 10 个硬盘，就能装下用来训练这些模型的整个互联网文本。</p>
+
+    <p><span class="timestamp">[00:02:35]</span> 我们处理的是纯文本，并且我们进行了非常积极的过滤，只保留高质量的部分。</p>
+
+    <h3>1.2 数据来源：Common Crawl</h3>
+
+    <p><span class="timestamp">[00:02:53]</span> 许多此类工作的起点是来自 <strong>Common Crawl</strong> 的数据。Common Crawl 是一个非营利组织，他们自 2007 年以来一直在抓取互联网。截至 2024 年，他们已经累积了巨大的抓取数据。</p>
+
+    <p><span class="timestamp">[00:03:08]</span> 他们使用这种"网络蜘蛛"在互联网上漫游。你从几个种子网页开始，跟随所有链接，不断索引所有信息，随着时间的推移，你最终会得到大量的互联网数据。这就是所有这些数据集的起点。</p>
+
+    <p><span class="timestamp">[00:03:22]</span> 但是，Common Crawl 的原始数据质量是非常低的，甚至可以说是"可怕的"。你需要通过一个复杂的管道（Pipeline）来处理这些数据。</p>
+
+    <h3>1.3 数据清洗管道 (The Pipeline)</h3>
+
+    <p><span class="timestamp">[00:03:40]</span> 让我们看看 FineWeb 是如何处理这些数据的：</p>
+
+    <ol>
+        <li><strong>URL 过滤 (URL Filtering)</strong>：
+            <br>使用黑名单过滤掉不需要的域名。例如，你可能不希望抓取恶意软件网站、垃圾邮件网站、纯营销网站。对于某些模型，你可能还想过滤掉成人内容（NSFW）。</li>
+        <li><strong>文本提取 (Text Extraction)</strong>：
+            <br>网页是原始的 HTML，包含大量的标记、JavaScript、CSS 等。我们需要提取纯文本。你需要去除导航栏、侧边栏、页脚等无关内容，只保留文章的主体文本。</li>
+        <li><strong>语言过滤 (Language Filtering)</strong>：
+            <br>Common Crawl 包含各种语言。例如，FineWeb 做了一个设计决策，他们使用语言分类器，只保留被识别为英语且置信度超过 65% 的网页。
+            <br><em>注意：这并不意味着我们不喜欢其他语言，但这通常是为了让模型在特定语言（如英语）上表现更好而做出的权衡。如果你过滤掉所有西班牙语，模型稍后在西班牙语上的表现自然会不佳。</em></li>
+        <li><strong>个人身份信息移除 (PII Removal)</strong>：
+            <br>我们需要移除电子邮件地址、社会安全号码等敏感信息。</li>
+        <li><strong>去重 (Deduplication)</strong>：
+            <br>互联网上有很多重复内容。我们需要识别并移除这些重复项，以免模型死记硬背或过拟合。</li>
+    </ol>
+
+    <p><span class="timestamp">[00:06:24]</span> 经过所有这些步骤，最终我们得到了像 FineWeb 这样的数据集。如果你查看这些数据，它们看起来就是纯文本文件。例如，这里有一篇关于 2012 年肯塔基州龙卷风的新闻文章，或者是一篇关于肾上腺的详细医学文章。</p>
+
+    <p><span class="timestamp">[00:06:55]</span> 这里的关键点是：我们现在拥有了大量多样化的文本，总计约 44 TB。这是我们下一阶段的起点。</p>
+
+    <hr>
+
+    <h2>2. 词元化 (Tokenization)：将文本转化为数字</h2>
+
+    <p><span class="timestamp">[00:07:05]</span> 为了给你一个直观的感觉，我编写了一个小脚本，取了 FineWeb 数据集的前 200 个文档并将它们连接在一起。我们得到了一块巨大的原始文本"挂毯"。</p>
+
+    <p><span class="timestamp">[00:07:30]</span> 接下来，我们希望训练一个神经网络来内化和模拟这些文本。但在将文本输入神经网络之前，我们需要解决一个问题：<strong>如何表示这些文本？</strong></p>
+
+    <h3>2.1 为什么不能直接用字符？</h3>
+
+    <p><span class="timestamp">[00:07:54]</span> 神经网络不仅是一个复杂的数学结构，它期望的输入必须是数字，或者具体来说，是 <strong>一维的符号序列</strong>。并且，我们需要一组 <strong>有限的可能符号</strong>（词表）。</p>
+
+    <p><span class="timestamp">[00:08:36]</span> 计算机底层存储文本使用的是 UTF-8 编码，也就是 0 和 1 的序列，或者是字节（Bytes）序列。
+    <ul>
+        <li>如果我们使用 0 和 1，序列会变得非常长。序列长度（Context Length）在神经网络中是一种非常昂贵的资源，我们不能浪费它。</li>
+        <li>如果我们使用字节（0-255），我们有 256 个可能的符号。这比二进制好，但在最先进的语言模型中，我们希望进一步压缩序列长度。</li>
+    </ul>
+
+    <p><span class="timestamp">[00:09:43]</span> 我们面临一个权衡：
+    <ol>
+        <li><strong>词表大小 (Vocabulary Size)</strong>：你可以拥有的独特符号的数量。</li>
+        <li><strong>序列长度 (Sequence Length)</strong>：表示同一段文本所需的符号总数。</li>
+    </ol>
+
+    我们希望在保持词表大小可控的前提下，尽可能缩短序列长度。</p>
+
+    <h3>2.2 字节对编码 (Byte Pair Encoding, BPE)</h3>
+
+    <p><span class="timestamp">[00:11:01]</span> 行业标准的解决方案是运行一种叫做 <strong>字节对编码（BPE）</strong> 的算法。
+    <br>它的工作原理是：
+    <ol>
+        <li>从原始字节开始。</li>
+        <li>寻找非常常见的连续字节对（例如 <code>t</code> 和 <code>h</code> 经常一起出现变成 <code>th</code>）。</li>
+        <li>将它们合并成一个新的符号，并在词表中为其分配一个新的 ID。</li>
+        <li>不断迭代这个过程，直到达到预定的词表大小。</li>
+    </ol>
+
+    <p><span class="timestamp">[00:11:30]</span> 实际上，大约 <strong>100,000 个</strong> 可能的符号是一个很好的甜蜜点（Sweet spot）。
+    <ul>
+        <li><strong>GPT-4</strong> 具体使用了 <strong>100,277</strong> 个符号。</li>
+        <li><strong>Llama 3</strong> 使用了 <strong>128,000</strong> 个符号。</li>
+    </ul>
+
+    <h3>2.3 Token 的实际样子</h3>
+
+    <p><span class="timestamp">[00:12:00]</span> 这种从原始文本转换为这些符号序列的过程称为 <strong>词元化（Tokenization）</strong>。这些符号被称为 <strong>词元（Tokens）</strong>。</p>
+
+    <p><span class="timestamp">[00:12:25]</span> 让我们看一个演示。我推荐使用 <code>tiktokenizer.vercel.app</code>。
+    <ul>
+        <li>输入：<code>Hello World</code></li>
+        <li>结果：这被分解为两个 Token。
+            <ul>
+                <li><code>Hello</code> -> ID 15339</li>
+                <li><code> world</code> -> ID 1917 (注意 <code>world</code> 前面的空格通常包含在单词的 Token 中)</li>
+            </ul>
+        </li>
+    </ul>
+
+    <p><span class="timestamp">[00:13:00]</span> 关键点：
+    <ul>
+        <li><strong>区分大小写</strong>：<code>hello</code> 和 <code>Hello</code> 是完全不同的 Token，有不同的 ID。</li>
+        <li><strong>空格处理</strong>：空格通常是 Token 的一部分。</li>
+        <li><strong>非英语语言</strong>：对于像韩语这样的语言，因为它们在训练数据中出现较少，BPE 算法合并得不够好，导致每个字可能需要更多的 Token（即序列更长，处理成本更高）。这是一个重要的问题，意味着某些语言使用 LLM 的成本更高。</li>
+    </ul>
+
+    <p><span class="timestamp">[00:14:50]</span> 所以，最终在神经网络看来，它看到的不是"文本"，而是 <strong>Token ID 的整数序列</strong>。例如：<code>[15339, 1917, 0, ...]</code>。这就是我们输入给模型的东西。</p>
+
+    <hr>
+
+    <h2>3. 神经网络训练 (Neural Network Training)</h2>
+
+    <p><span class="timestamp">[00:15:21]</span> 现在进入最有趣的部分：神经网络训练。
+    <br>我们在这一步要做的是：模拟这些 Token 在序列中相互跟随的统计关系。</p>
+
+    <h3>3.1 训练设置：预测下一个 Token</h3>
+
+    <p><span class="timestamp">[00:15:40]</span> 想象我们有一个 <strong>上下文窗口（Context Window）</strong>。
+    <br>在训练过程中，我们从庞大的数据集中随机选取一段。假设我们的窗口大小仅为 4 个 Token（实际上通常是 4096, 8192 或更多）。
+
+    <ul>
+        <li><strong>输入</strong>：<code>the</code>, <code>cat</code>, <code>sat</code>, <code>on</code> (对应的 Token ID 序列)</li>
+        <li><strong>目标</strong>：预测第五个 Token 是什么？</li>
+    </ul>
+
+    <p><span class="timestamp">[00:16:00]</span> 神经网络接收这 4 个整数作为输入。它的输出是什么？
+    <br>它的输出是对下一个 Token 的预测。具体来说，它输出 <strong>100,277 个数字</strong>（对应词表大小）。每个数字代表该 Token 成为"下一个 Token"的 <strong>概率</strong>。</p>
+
+    <h3>3.2 初始化与迭代</h3>
+
+    <p><span class="timestamp">[00:17:14]</span> 
+    <ol>
+        <li><strong>初始状态</strong>：也就是"婴儿"神经网络。它的参数是随机初始化的。如果你输入 <code>the cat sat on</code>，它输出的概率分布是完全混乱均匀的，它可能会预测下一个词是 <code>refrigerator</code> 或 <code>sky</code>，完全随机。</li>
+        <li><strong>标签（Label）</strong>：但是，因为我们是在训练集上进行训练，我们 <strong>知道</strong> 正确答案是什么。在原句中，<code>the cat sat on</code> 后面是 <code>a</code>。</li>
+        <li><strong>计算损失（Loss）</strong>：我们比较模型的预测（随机垃圾）和事实（<code>a</code>）。我们计算一个叫做"损失"的数学指标，它衡量模型错得有多离谱。</li>
+        <li><strong>更新参数</strong>：这是魔法发生的地方。我们使用一种叫做 <strong>反向传播（Backpropagation）</strong> 的算法，精确地计算如何调整神经网络内部的每一个参数（权重），使得下次输入 <code>the cat sat on</code> 时，<code>a</code> 的概率稍微高一点点，而其他词的概率稍微低一点点。</li>
+    </ol>
+
+    <p><span class="timestamp">[00:19:00]</span> 这就是训练的全部内容。我们在数十亿甚至数万亿的 Token 上，重复这个过程数万亿次。我们不断地给它看片段，让它预测，计算错误，调整参数。</p>
+
+    <h3>3.3 神经网络内部结构 (Transformer)</h3>
+
+    <p><span class="timestamp">[00:20:19]</span> 让我们稍微打开一下这个"黑盒子"。这个神经网络到底是什么？
+    <br>现代 LLM 都使用一种特定的架构，称为 <strong>Transformer</strong>（由 Google 在 2017 年提出）。</p>
+
+    <p><span class="timestamp">[00:21:00]</span> 即使是像 Llama 3 405B 这样巨大的模型，其定义代码也非常简短。如果你去掉了注释和空行，定义整个神经网络架构的代码可能只有几百行 Python 代码。</p>
+
+    <p><span class="timestamp">[00:22:00]</span> 
+    <ul>
+        <li><strong>参数（Parameters/Weights）</strong>：这些是模型的"知识"存储在的地方。它们只是存储在计算机内存中的数字。对于 GPT-2，有 15 亿个参数；对于 Llama 3，有 4050 亿个参数。</li>
+        <li><strong>运算</strong>：神经网络不仅仅是参数，它是一种数学表达式。输入数据（Token）进入网络，与这些参数进行大量的加法、乘法、指数运算。</li>
+    </ul>
+
+    <p><span class="timestamp">[00:23:19]</span> 你可以把这想象成信息流。Token ID 进入底部，经过层层处理（Block 1, Block 2, ... Block 96...），每一层都在更新和精炼这些信息，直到最后顶部输出预测概率。</p>
+
+    <p><span class="timestamp">[00:24:00]</span> 有人喜欢把这比作大脑。参数是突触连接的强度，神经元是计算单元。虽然这种类比有一定道理，但人工神经网络非常规则、简单且数学化，与生物大脑的复杂性相比其实相去甚远。它们没有"生物记忆"，它们只是一个巨大的、固定的数学表达式，我们将数据推过这个表达式。</p>
+
+    <hr>
+
+    <h2>4. 推理阶段 (Inference)：生成文本</h2>
+
+    <p><span class="timestamp">[00:26:13]</span> 假设我们已经训练好了模型，现在我们进入 <strong>推理（Inference）</strong> 阶段。这是你使用模型生成新文本的时候。</p>
+
+    <p><span class="timestamp">[00:26:26]</span> 这是一个循环过程：
+    <ol>
+        <li><strong>输入</strong>：给模型一个提示（Prompt），例如 <code>The</code>。</li>
+        <li><strong>预测</strong>：模型输出下一个 Token 的概率分布。比如它说 <code>cat</code> 的概率是 30%，<code>dog</code> 是 20% 等。</li>
+        <li><strong>采样 (Sampling)</strong>：这是一个关键步骤。我们不仅仅选概率最高的那个（虽然可以这么做，称为 Greedy Decoding），通常我们会根据这个概率分布"掷骰子"。这意味着即使 <code>cat</code> 概率最高，我们也可能偶尔选中 <code>dog</code>。这赋予了模型 <strong>创造性</strong> 和 <strong>多样性</strong>。</li>
+        <li><strong>循环</strong>：假设我们选中了 <code>cat</code>。我们将 <code>cat</code> 加回到输入中，现在输入变成了 <code>The cat</code>。我们再次将其喂给神经网络，预测下一个 Token。</li>
+    </ol>
+
+    <p><span class="timestamp">[00:28:00]</span> 这个过程不断重复，直到模型生成一个特殊的 <strong>结束 Token</strong>（End of Text Token），或者达到最大长度。</p>
+
+    <p><span class="timestamp">[00:29:57]</span> 总结一下第一阶段（预训练）：
+    <ul>
+        <li>我们得到了一大堆互联网文本。</li>
+        <li>我们将文本转化为 Token 序列。</li>
+        <li>我们训练一个 Transformer 神经网络来预测序列中的下一个 Token。</li>
+        <li>训练后的产物称为 <strong>基座模型（Base Model）</strong>。</li>
+    </ul>
+
+    <div class="back-link">
+        <a href="index.html">← 返回 CS146S 学习笔记</a>
+    </div>
+</body>
+</html>
