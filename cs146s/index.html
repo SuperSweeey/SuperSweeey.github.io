@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS146S - VibeCoding 学习笔记</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.8;
+            color: #333;
+            background: #fafafa;
+        }
+        .header {
+            text-align: center;
+            padding: 40px 0;
+            border-bottom: 3px solid #6366f1;
+            margin-bottom: 40px;
+        }
+        h1 {
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #64748b;
+            font-size: 1.1em;
+        }
+        .note-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .note-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+        .note-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #1e293b;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .note-meta {
+            color: #64748b;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+        .note-link {
+            display: inline-block;
+            padding: 10px 25px;
+            background: #6366f1;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        .note-link:hover {
+            background: #4f46e5;
+            text-decoration: none;
+        }
+        .priority {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+        .priority-high {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 30px;
+            color: #6366f1;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">← 返回主页</a>
+    
+    <div class="header">
+        <h1>📚 CS146S - VibeCoding 学习笔记</h1>
+        <p class="subtitle">斯坦福大学 CS146S Vibe Coding 课程的中文学习笔记</p>
+    </div>
+    
+    <div class="note-card">
+        <div class="note-title">
+            <span class="icon">📖</span>
+            Deep Dive into LLMs like ChatGPT (Part 1-4)
+        </div>
+        <div class="note-meta">
+            <span class="priority priority-high">⭐ 必读</span>
+            • 讲师: Andrej Karpathy
+            • 所属周次: Week 1-1
+            • 阅读时间: 约 25 分钟 (Part 1)
+            • 翻译日期: 2026-02-02
+            • 当前进度: Part 1 / 5
+        </div>
+        <p style="color: #475569; margin-bottom: 20px;">
+            这是Andrej Karpathy关于大型语言模型（LLM）的深度解析视频的中文翻译笔记。
+            从预训练、词元化、神经网络训练，到推理阶段、后训练、强化学习，
+            完整讲解了ChatGPT这类模型的工作原理。
+        </p>
+        <a href="Week1_01_Deep_Dive_into_LLMs.md" class="note-link">
+            📄 查看完整笔记
+        </a>
+    </div>
+    
+    <div style="text-align: center; margin-top: 50px; padding: 30px; color: #94a3b8;">
+        <p>💡 提示：更多笔记正在整理中，敬请期待！</p>
+    </div>
+</body>
+</html>
